@@ -6,10 +6,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(CMAKE_BUILD_TYPE Release)
 
-# OpenMP
-find_package(OpenMP REQUIRED)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-
 # Cpp-Library
 set(CMAKE_PREFIX_PATH ~/Library/Cpp-Library)
 find_package(CL REQUIRED)
@@ -37,6 +33,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${initial_CXX_FLAGS}")
 add_executable(FSSH.exe
     ../common/Hd.cpp
     ../common/initer.cpp
+    ../common/trajwriter.cpp
     main.cpp
 )
 

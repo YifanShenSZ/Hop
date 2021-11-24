@@ -2,12 +2,15 @@
 #include <CppLibrary/utility.hpp>
 #include <CppLibrary/chemistry.hpp>
 
+#include <tchem/utility.hpp>
+
 #include <hop/FSSH.hpp>
 
 #include <initial/harmonic.hpp>
 
 #include "../common/Hd.hpp"
 #include "../common/initer.hpp"
+#include "../common/trajwriter.hpp"
 
 argparse::ArgumentParser parse_args(const size_t & argc, const char ** & argv) {
     CL::utility::echo_command(argc, argv, std::cout);
@@ -18,6 +21,7 @@ argparse::ArgumentParser parse_args(const size_t & argc, const char ** & argv) {
     parser.add_argument("-d","--diabatz", '+', false, "diabatz definition files");
     parser.add_argument("-x","--xyz",       1, false, "initial xyz geometry");
     parser.add_argument("-m","--mass",      1, false, "the masses of atoms");
+    parser.add_argument("-H","--Hessian",   1, false, "the Hessian at initial geometry");
 
     // optional arguments
     parser.add_argument("-t","--time_step",   1, true, "time step in fs, default = 0.1");
@@ -42,7 +46,7 @@ int main(size_t argc, const char ** argv) {
     at::Tensor r = at::from_blob(coords.data(), coords.size(), at::TensorOptions().dtype(torch::kFloat64));
     auto mass = CL::utility::read_vector(args.retrieve<std::string>("mass"));
     for (double & atom : mass) atom *= 1822.888486192;
-    at::Tensor Hessian = compute_ddHa(r)[0][0];
+    at::Tensor Hessian = tchem::utility::read_vector(args.retrieve<std::string>("Hessian")).reshape({r.size(0), r.size(0)});
     Initer initer(r, mass, Hessian);
 
     at::Tensor mass_vector = r.new_empty(r.sizes());
@@ -62,26 +66,22 @@ int main(size_t argc, const char ** argv) {
     hopper.initialize(active_state, x, p, at::tensor({0.0, 0.0, 1.0, 0.0}));
     // output preparation
     size_t step_count = 0;
-    auto symbols = geom.symbols();
+    TrajWriter trajwriter(geom.symbols());
     std::ofstream traj_ofs, state_ofs;
     traj_ofs.open("trajectory.txt");
     state_ofs.open("state.txt");
+    trajwriter(x, traj_ofs);
+    state_ofs << active_state << '\n';
     // main loop
     while (true) {
-        // output every `output_freq` steps
-        if (step_count % output_freq == 0) {
-            // output geometry
-            const at::Tensor & r = hopper.x();
-            auto coords = geom.coords();
-            for (size_t i = 0; i < coords.size(); i++) coords[i] = r[i].item<double>();
-            CL::chem::xyz<double> out_geom(symbols, coords, true);
-            out_geom.print(traj_ofs);
-            // output active state
-            state_ofs << hopper.active_state() << '\n';
-        }
         // propagate
         hopper.step(dt);
         step_count++;
+        // output every `output_freq` steps
+        if (step_count % output_freq == 0) {
+            trajwriter(hopper.x(), traj_ofs);
+            state_ofs << hopper.active_state() << '\n';
+        }
         // stop when one of the N-H bonds > 3 A
         const at::Tensor & r = hopper.x();
         at::Tensor NH1 = r.slice(0, 21, 24) - r.slice(0, 0, 3),
