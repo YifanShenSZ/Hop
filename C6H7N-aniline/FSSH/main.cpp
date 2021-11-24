@@ -59,13 +59,10 @@ int main(size_t argc, const char ** argv) {
     size_t active_state;
     at::Tensor x, p;
     std::tie(active_state, x, p) = initer();
-std::cerr << "got initial condition\n";
     hopper.initialize(active_state, x, p, at::tensor({0.0, 0.0, 1.0, 0.0}));
-std::cerr << "pass initialize\n";
     // output preparation
     size_t step_count = 0;
     auto symbols = geom.symbols();
-std::cerr << "pass symbols\n";
     std::ofstream traj_ofs, state_ofs;
     traj_ofs.open("trajectory.txt");
     state_ofs.open("state.txt");
@@ -75,10 +72,8 @@ std::cerr << "pass symbols\n";
         if (step_count % output_freq == 0) {
             // output geometry
             const at::Tensor & r = hopper.x();
-std::cerr << r << '\n';
             auto coords = geom.coords();
             for (size_t i = 0; i < coords.size(); i++) coords[i] = r[i].item<double>();
-std::cerr << "pass coords\n";
             CL::chem::xyz<double> out_geom(symbols, coords, true);
             out_geom.print(traj_ofs);
             // output active state

@@ -38,11 +38,8 @@ void Base::initialize(const int64_t & _active_state, const at::Tensor & _x, cons
     p_old_ = _p.clone();
     // adiabatic representation
     at::Tensor Hd, dHd;
-std::cerr << "compute Hd\n";
     std::tie(Hd, dHd) = compute_Hd_dHd_(_x);
-std::cerr << "got Hd\n";
     std::tie(energy_old_, states_old_) = Hd.symeig(true);
-std::cerr << "pass diag\n";
     dHa_old_ = tchem::linalg::UT_sy_U(dHd, states_old_);
     // electronic wave function
     c_old_ = _x.new_zeros({NStates_, 2});
