@@ -68,7 +68,7 @@ int main(size_t argc, const char ** argv) {
     size_t step_count = 0;
     TrajWriter trajwriter(geom.symbols());
     std::ofstream traj_ofs, state_ofs;
-    traj_ofs.open("trajectory.txt");
+    traj_ofs.open("trajectory.xyz");
     state_ofs.open("state.txt");
     trajwriter(x, traj_ofs);
     state_ofs << active_state << '\n';
