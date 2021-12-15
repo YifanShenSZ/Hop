@@ -41,11 +41,12 @@ int main(size_t argc, const char ** argv) {
     std::vector<std::string> diabatz_inputs = args.retrieve<std::vector<std::string>>("diabatz");
     HdKernel = std::make_shared<Hd::kernel>(diabatz_inputs);
 
-    CL::chem::xyz<double> geom(args.retrieve<std::string>("xyz"), true);
+    std::string geom_file = args.retrieve<std::string>("xyz"),
+                mass_file = args.retrieve<std::string>("mass");
+    CL::chem::xyz_mass<double> geom(geom_file, mass_file, true);
+    auto mass = geom.masses();
     std::vector<double> coords = geom.coords();
     at::Tensor r = at::from_blob(coords.data(), coords.size(), at::TensorOptions().dtype(torch::kFloat64));
-    auto mass = CL::utility::read_vector(args.retrieve<std::string>("mass"));
-    for (double & atom : mass) atom *= 1822.888486192;
     at::Tensor Hessian = tchem::utility::read_vector(args.retrieve<std::string>("Hessian")).reshape({r.size(0), r.size(0)});
     Initer initer(r, mass, Hessian);
 

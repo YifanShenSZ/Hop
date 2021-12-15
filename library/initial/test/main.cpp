@@ -32,7 +32,7 @@ int main() {
         x -= r;
         x = harmonic.sqrt_mass().mv(x);
         p = harmonic.invsqrt_mass().mv(p);
-        Exx += (x).outer(x);
+        Exx += x.outer(x);
         Epp += p.outer(p);
     }
     Exx /= (double)NAvg;
