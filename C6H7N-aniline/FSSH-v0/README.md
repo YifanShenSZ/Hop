@@ -1,3 +1,0 @@
-FSSH
-
-diabatz v0

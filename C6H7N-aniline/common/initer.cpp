@@ -25,9 +25,13 @@ std::tuple<size_t, at::Tensor, at::Tensor> Initer::operator()() {
         population[i] = c * c;
     }
     double random = (double)(*generator_)() / (double)(generator_->max() - generator_->min() + 1);
+    size_t active_state = NStates - 1;
     for (size_t i = 0; i < NStates - 1; i++) {
-        if (random < population[i]) return std::make_tuple(i, x, p);
+        if (random < population[i]) {
+            active_state = i;
+            break;
+        }
         else random -= population[i];
     }
-    return std::make_tuple(NStates - 1, x, p);
+    return std::make_tuple(active_state, x, p);
 }

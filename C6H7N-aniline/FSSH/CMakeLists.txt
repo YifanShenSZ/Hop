@@ -16,7 +16,6 @@ find_package(tchem REQUIRED)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TCHEM_CXX_FLAGS}")
 
 # libHd
-set(CMAKE_PREFIX_PATH ~/Software/Mine/diabatz/tools/v1/libHd)
 find_package(Hd REQUIRED)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Hd_CXX_FLAGS}")
 
