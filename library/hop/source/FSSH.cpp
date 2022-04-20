@@ -26,7 +26,7 @@ std::vector<double> FSSH::compute_probabilities(const double & dt) const {
     double total = std::accumulate(probabilities.begin(), probabilities.end(), 0.0);
     if (total > 1.0) {
         std::cerr << "hop::FSSH::compute_probabilities warning: the sum of hopping probability > 1,\n"
-                  << "                                          please consider decreasing time step";
+                  << "                                          please consider decreasing time step\n";
         for (double & probability : probabilities) probability /= total;
     }
     return probabilities;
