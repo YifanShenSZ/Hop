@@ -36,7 +36,10 @@ Harmonic::Harmonic(const at::Tensor & _x, const std::vector<double> & _mass, con
     // obtain frequency^2 and mass weighed normal modes
     at::Tensor freqs;
     std::tie(freqs, normal_mode_) = Hessian.symeig(true);
-    if (freqs[6].item<double>() < 0.0) throw std::invalid_argument(
+    // assume 3 centre of mass translation + 3 rigid body rotation, i.e. non-linear molecule
+    // when there is no imaginary frequency, freqs[0:6] == 0 and freqs[6] > 0
+    // chemically, a non-trivial freq > 1 cm^-1 = 1e-5 a.u, so set tolerance 1e-10
+    if (freqs[6].item<double>() < 1e-10) throw std::invalid_argument(
     "Harmonic::Harmonic: imaginary frequency at initial geometry");
     // initialize Wigner sampling
     srand(time(NULL));
